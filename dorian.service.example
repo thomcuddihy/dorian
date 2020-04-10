@@ -1,0 +1,14 @@
+[Unit]
+Description=Dorian bot service
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=dorian
+Environment=DORIAN_TOKEN=bot_token
+ExecStart=/path/to/dorian/dorian.py
+
+[Install]
+WantedBy=multi-user.target
