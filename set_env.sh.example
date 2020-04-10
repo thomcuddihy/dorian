@@ -1,0 +1,2 @@
+# fill in your token, and then `source set_env.sh` or add to RC/Profile scripts
+export DORIAN_TOKEN="your-token-here"
