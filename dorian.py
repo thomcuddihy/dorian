@@ -16,6 +16,7 @@ FirstConnect=True
 LastPlayingIndex=-1
 PlayingQuotes = {
         1: "with dice",
+        2: "second item"
     }
 
 COL_CRIT_SUCCESS=0xFFFFFF
@@ -169,8 +170,8 @@ async def on_ready():
     print("Dorian connected")
     if FirstConnect:
         FirstConnect = False
-        while True:
-            await asyncio.ensure_future(cyclePlaying())
+        #while True:
+            #await asyncio.ensure_future(cyclePlaying())
         
 @client.event
 async def on_message(message):
