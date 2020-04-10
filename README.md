@@ -2,7 +2,7 @@
 
 ## Call of Cthulhu 7E dice roller bot for Discord
 
-[Discord Bot entry.](https://top.gg/bot/...)
+[Discord Bot entry.](https://top.gg/bot/698078321472176200)
 
 ## Usage
 
