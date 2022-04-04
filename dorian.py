@@ -1,23 +1,12 @@
 #!/usr/bin/env python3
 import discord
-import re
-import logging
-import asyncio
+import re, logging
 from os import environ
 from random import randint
 
 logging.basicConfig(level=logging.INFO)
 
-client = discord.Client()
-discord.opus.load_opus
-roll_command = "/croll"
-
-FirstConnect=True
-LastPlayingIndex=-1
-PlayingQuotes = {
-        1: "with dice",
-        2: "second item"
-    }
+bot = discord.Bot()
 
 COL_CRIT_SUCCESS=0xFFFFFF
 COL_EXTR_SUCCESS=0xf1c40f
@@ -36,7 +25,7 @@ def RollDie(min=1, max=10):
     result = randint(min,max)
     return result
 
-def ResolveDice(BonusDie, PenaltyDie, Threshold):
+def ResolveDice(BonusDie, PenaltyDie, Threshold, DiceString) :
   TenResultPool = []
   TenResultPool.append(RollDie(0, 9))
 
@@ -55,7 +44,10 @@ def ResolveDice(BonusDie, PenaltyDie, Threshold):
       TenResult = max(TenResultPool)
 
   CombinedResult = (TenResult*10) + OneResult
-  desc = str(TenResult*10) + '(' + '/'.join([str(i*10) for i in TenResultPool]) + ') + ' + str(OneResult) + ' = ' + str(CombinedResult)
+  desc = f"""
+Roll: {DiceString}
+Result: {str(TenResult*10)} ({'/'.join([str(i*10) for i in TenResultPool])}) + {str(OneResult)} = {str(CombinedResult)}
+"""
 
   if Threshold:
     ret = DiceResult()
@@ -85,8 +77,7 @@ def ResolveDice(BonusDie, PenaltyDie, Threshold):
     return ret
 
 def parseRoll(diceString):
-    fail="""
-Unable to parse dice command. Usage:
+    help = """
 ```
 /croll [[number=1][die type]]...[[score][threshold]]
 
@@ -109,6 +100,13 @@ Examples:
     Failure: 0/50/70 + 4 = 74
 ```
 """
+    fail="""
+Unable to parse dice command. Usage:
+""" + help
+
+    if diceString == 'help':
+        return help
+    
     dice=[x for x in re.split('(\d*?[bpt])',diceString) if x]
 
     if len(dice) > 1 and 'b' in diceString and 'p' in diceString:
@@ -153,40 +151,24 @@ Examples:
             else:
               Threshold = num
         
-    return ResolveDice(BonusDie, PenaltyDie, Threshold)
+    return ResolveDice(BonusDie, PenaltyDie, Threshold, diceString)
 
-async def cyclePlaying():
-    global LastPlayingIndex
-    playing=PlayingQuotes[randint(1,len(PlayingQuotes))]
-    while playing == LastPlayingIndex:
-        playing=PlayingQuotes[randint(1,len(PlayingQuotes))]
-    LastPlayingIndex=playing
-    #await client.change_presence(game=discord.Game(name=playing))
-    await asyncio.sleep(randint(60,600))
+@bot.slash_command(name="croll")
+async def cthulhu_roll(
+    ctx: discord.ApplicationContext,
+    dice: discord.Option(str, "Dice string. Enter 'help' for more details.")
+):
+    """
+    Call of Cthulhu dice roll.
+    """
+    result = parseRoll(dice)
+    if isinstance(result, str):
+        await ctx.respond(result)
+    else:
+        em = discord.Embed(title=result.title, description=result.desc, colour=result.colour)
+        em.set_footer(text=result.desc)
+        em.description=None
+        await ctx.respond(embed=em)
 
-@client.event
-async def on_ready():
-    global FirstConnect
-    print("Dorian connected")
-    if FirstConnect:
-        FirstConnect = False
-        #while True:
-            #await asyncio.ensure_future(cyclePlaying())
-        
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-
-    if message.content.startswith(roll_command):
-        result = parseRoll(message.content[len(roll_command)+1:])
-        if isinstance(result, str):
-            await message.channel.send(result)
-        else:
-            em = discord.Embed(title=result.title, description=result.desc, colour=result.colour)
-            em.set_footer(text=result.desc)
-            em.description=None
-            await message.channel.send(embed=em)
-    
 token=environ['DORIAN_TOKEN']
-client.run(token)
+bot.run(token)
