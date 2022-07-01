@@ -156,7 +156,7 @@ Unable to parse dice command. Usage:
 @bot.slash_command(name="croll")
 async def cthulhu_roll(
     ctx: discord.ApplicationContext,
-    dice: discord.Option(str, "Dice string. Enter 'help' for more details.")
+    dice: discord.Option(str, "Dice string. Enter 'help' for more details.", default="")
 ):
     """
     Call of Cthulhu dice roll.
