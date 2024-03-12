@@ -21,13 +21,13 @@ class DiceResult:
         self.desc=""
         self.colour=COL_NORM_SUCCESS
 
-def RollDie(min=1, max=10):
-    result = randint(min,max)
+def RollDie(min=0, max=9):
+    result = randint(min, max)
     return result
 
 def ResolveDice(BonusDie, PenaltyDie, Threshold, DiceString) :
   TenResultPool = []
-  TenResultPool.append(RollDie(0, 9))
+  TenResultPool.append(RollDie())
 
   TenResult = min(TenResultPool)
   OneResult = RollDie()
@@ -36,14 +36,18 @@ def ResolveDice(BonusDie, PenaltyDie, Threshold, DiceString) :
       return "Can't chain bonus and penalty dice"
 
   for i in range(BonusDie):
-      TenResultPool.append(RollDie(0, 9))
+      TenResultPool.append(RollDie())
       TenResult = min(TenResultPool)
   
   for i in range(PenaltyDie):
-      TenResultPool.append(RollDie(0, 9))
+      TenResultPool.append(RollDie())
       TenResult = max(TenResultPool)
 
-  CombinedResult = (TenResult*10) + OneResult
+  if TenResult == 0 and OneResult == 0:
+    CombinedResult = 100
+  else:
+    CombinedResult = TenResult * 10 + OneResult
+
   desc = f"""
 Roll: {DiceString}
 Result: {str(TenResult*10)} ({'/'.join([str(i*10) for i in TenResultPool])}) + {str(OneResult)} = {str(CombinedResult)}
